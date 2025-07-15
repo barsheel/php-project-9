@@ -20,8 +20,8 @@ autoload:
 	composer dump-autoload
 
 lint:
-	composer exec --verbose phpcbf -- --standard=PSR12 .
-	composer exec --verbose phpcs -- --standard=PSR12 .
+	composer exec --verbose phpcbf -- --standard=PSR12 ./public ./src
+	composer exec --verbose phpcs -- --standard=PSR12 ./public ./src
 
 stan:
 	composer exec phpstan -- analyze -c phpstan.neon
