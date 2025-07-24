@@ -61,6 +61,29 @@ class UrlRepository
         return new Url($id, $name, $createdAt);
     }
 
+    public function findByName($name): ?Url
+    {
+        $sql = "SELECT                     
+                    id,
+                    name,
+                    created_at
+                FROM urls
+                WHERE :name = name;";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue('name', $name);
+        $stmt->execute();
+
+        if (!($row = $stmt->fetch())) {
+            return null;
+        }
+
+        $id = $row['id'];
+        $createdAt = $row['created_at'];
+
+        return new Url($id, $name, $createdAt);
+    }
+    
     public function readAll(): Collection
     {
         $sql = "SELECT
