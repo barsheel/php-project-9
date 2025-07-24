@@ -2,10 +2,10 @@
 
 namespace Hexlet\Code;
 
-class Check
+class UrlCheck
 {
     private int $id;
-    private int $responseCode;
+    private int $statusCode;
     private string $h1;
     private string $title;
     private string $description;
@@ -13,14 +13,14 @@ class Check
 
     public function __construct(
         int $id,
-        int $responseCode,
+        int $statusCode,
         string $h1,
         string $title,
         string $description,
         string $createdAt
     ) {
         $this->id = $id;
-        $this->responseCode = $responseCode;
+        $this->statusCode = $statusCode;
         $this->h1 = $h1;
         $this->title = $title;
         $this->description = $description;
@@ -38,14 +38,14 @@ class Check
     }
 
 
-    public function getResponseCode(): int
+    public function getStatusCode(): int
     {
-        return $this->responseCode;
+        return $this->statusCode;
     }
 
-    public function setResponseCode(int $responseCode): void
+    public function setStatusCode(int $statusCode): void
     {
-        $this->responseCode = $responseCode;
+        $this->statusCode = $statusCode;
     }
 
     public function getH1(): string

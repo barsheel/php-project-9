@@ -4,7 +4,7 @@ namespace Hexlet\Code;
 
 use Illuminate\Support\Collection;
 
-class CheckRepository
+class UrlCheckRepository
 {
     private \PDO $conn;
 
@@ -17,17 +17,17 @@ class CheckRepository
     {
         $sqlChecks =
             "SELECT
-                checks.id,
-                response_code,
+                url_checks.id,
+                status_code,
                 h1,
                 title,
                 description,
-                checks.created_at
+                url_checks.created_at
             FROM urls
-            INNER JOIN checks
-            ON urls.id = checks.url_id
+            INNER JOIN url_checks
+            ON urls.id = url_checks.url_id
             WHERE :id = urls.id
-            ORDER BY checks.created_at DESC;";
+            ORDER BY url_checks.created_at DESC;";
 
         $stmt = $this->conn->prepare($sqlChecks);
         $stmt->bindValue('id', $urlId);
@@ -35,9 +35,9 @@ class CheckRepository
 
         $checks = [];
         while ($row = $stmt->fetch()) {
-            $checks[] = new Check(
+            $checks[] = new UrlCheck(
                 $row['id'],
-                $row['response_code'],
+                $row['status_code'],
                 $row['h1'],
                 $row['title'],
                 $row['description'],

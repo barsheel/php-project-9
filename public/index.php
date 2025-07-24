@@ -9,7 +9,7 @@ use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Hexlet\Code\UrlRepository;
-use Hexlet\Code\CheckRepository;
+use Hexlet\Code\UrlCheckRepository;
 
 const DATABASE_ENV_NAME = 'DATABASE_URL';
 const DATABASE_PORT = 5432;
@@ -57,7 +57,7 @@ $app->get('/', function ($request, $response) {
 $app->get('/urls', function ($request, $response) {
 
     $urlRepository = $this->get(UrlRepository::class);
-    $checkRepository = $this->get(CheckRepository::class);
+    $checkRepository = $this->get(UrlCheckRepository::class);
     $urls = $urlRepository->readAll();
 
     $urlsDTO = [];
@@ -69,13 +69,13 @@ $app->get('/urls', function ($request, $response) {
         $lastCheck = $checks->first();
 
         $lastCheckDate = $lastCheck ? $lastCheck->getCreatedAt() : '-';
-        $lastResponseCode = $lastCheck ? $lastCheck->getResponseCode() : '-';
+        $lastStatusCode = $lastCheck ? $lastCheck->getStatusCode() : '-';
 
         $urlsDTO[] = [
             'id' => $id,
             'name' => $url->getName(),
             'lastCheckDate' => $lastCheckDate,
-            'lastResponseCode' => $lastResponseCode,
+            'lastStatusCode' => $lastStatusCode,
         ];
     }
 
@@ -91,7 +91,7 @@ $app->get('/urls', function ($request, $response) {
 
 $app->get('/urls/{id}', function ($request, $response, $args) {
     $urlRepository = $this->get(UrlRepository::class);
-    $checkRepository = $this->get(CheckRepository::class);
+    $checkRepository = $this->get(UrlCheckRepository::class);
     $id = $args['id'];
     $url = $urlRepository->findById($id);
 
@@ -106,7 +106,7 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
     foreach ($checks as $check) {
         $checksDTO[] = [
             'id' => $check->getId(),
-            'responseCode' => $check->getResponseCode(),
+            'statusCode' => $check->getStatusCode(),
             'h1' => $check->getH1(),
             'title' => $check->getTitle(),
             'description' => $check->getDescription(),
@@ -124,8 +124,21 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
     return $twig->render($response, 'url_template.twig', $params);
 })->setName('url');
 
+$app->post('/urls', function ($request, $response, $args) {
+    $twig = $this->get(Twig::class);
+    $params = ['test' => 'test'];
+
+    return $twig->render($response, 'urls_template.twig', $params);
+})->setName('add_url');
 
 
+$app->post('/urls/{id}/checks', function ($request, $response, $args) {
+    $twig = $this->get(Twig::class);
+    $params = ['test' => 'test'];
 
+    return $twig->render($response, 'urls_template.twig', $params);
+})->setName('url_check');
 
 $app->run();
+
+
