@@ -1,16 +1,36 @@
     {% extends "base_template.twig" %}
 
 {% block content %}
-    <div class="card d-xxl-flex flex-wrap mx-auto justify-content-xxl-center align-items-xxl-start" style="box-shadow: 0px 0px 18px rgb(202,228,255);position: relative;margin: 20px;min-width: 300px;margin-right: 20px;margin-left: 20px;max-width: 600px;">
-        <div class="card-body">
-            <h2 class="card-title">Анализатор страниц</h2>
-            <h6 class="text-muted card-subtitle mb-2" style="line-height: 30.2px;">Бесплатно проверяйте сайты на SEO пригодность</h6>
-            
-            <form class="d-flex d-xxl-flex" action = "/urls" method="post" enctype="application/x-www-form-urlencoded">
-                <input class="form-control" type="text" placeholder="https://www.example.com" name="url[name]">
-                <button class="btn btn-primary" type="submit" style="margin-left: 13px;">Проверить</button>
-            </form>
-        
-        </div>
-    </div>
+<div class="card mx-auto my-4" style="box-shadow: 0px 0px 18px rgb(202,228,255); max-width: 600px;">
+  <div class="card-body">
+    <h2 class="card-title">Анализатор страниц</h2>
+    <h6 class="text-muted card-subtitle mb-4">
+      Бесплатно проверяйте сайты на SEO пригодность
+    </h6>
+
+    <form class="row g-2 align-items-start" action="/urls" method="post" enctype="application/x-www-form-urlencoded">
+      <div class="col-12 col-sm flex-grow-1">
+        <input
+          type="text"
+          name="url[name]"
+          class="form-control {{ errors.url_name is defined ? 'is-invalid' }}"
+          placeholder="https://www.example.com"
+          value="{{ url_name|default('')|e }}"
+        >
+        {% if errors.url_name is defined %}
+          <div class="invalid-feedback d-block">
+            {{ errors.url_name }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-12 col-sm-auto">
+        <button type="submit" class="btn btn-primary w-100">
+          Проверить
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}
