@@ -12,18 +12,18 @@ class UrlRepository
     {
         $this->conn = $conn;
     }
-    public function save(Url $url): bool
+    public function save(String $name): bool
     {
         $sql = "INSERT INTO urls (
                         name,
                         created_at
                     )
-                    VALUES
+                    VALUES (
                         :name,
-                        :created_at;";
+                        NOW()
+                    );";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue('name', $url->getName());
-        $stmt->bindValue('created_at', $url->getCreatedAt());
+        $stmt->bindValue('name', strtolower($name));
 
         return $stmt->execute();
     }
