@@ -16,6 +16,8 @@ const DATABASE_PORT = 5432;
 
 session_start();
 
+
+
 $container = new Container();
 
 $container->set(Twig::class, function () {
@@ -31,9 +33,7 @@ $container->set('flash', function () {
 });
 
 $container->set(\PDO::class, function () {
-
     $databaseUrl = parse_url(getenv(DATABASE_ENV_NAME));
-
     $user = $databaseUrl['user'];
     $pass = $databaseUrl['pass'];
     $host = $databaseUrl['host'];
@@ -47,6 +47,8 @@ $container->set(\PDO::class, function () {
 
 $app = AppFactory::createFromContainer($container);
 
+
+
 $app->add(TwigMiddleware::create($app, $container->get(Twig::class)));
 $app->addErrorMiddleware(true, true, true);
 
@@ -58,21 +60,16 @@ $app->get('/', function ($request, $response) {
 })->setName('index');
 
 
-
 $app->get('/urls', function ($request, $response) {
-
     $urlRepository = $this->get(UrlRepository::class);
     $checkRepository = $this->get(UrlCheckRepository::class);
     $urls = $urlRepository->readAll();
 
     $urlsDTO = [];
-
     foreach ($urls as $url) {
         $id = $url->getId();
         $checks = $checkRepository->findChecksByUrlId($id);
-
         $lastCheck = $checks->first();
-
         $lastCheckDate = $lastCheck ? $lastCheck->getCreatedAt() : '-';
         $lastStatusCode = $lastCheck ? $lastCheck->getStatusCode() : '-';
 
@@ -190,5 +187,3 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
 
 
 $app->run();
-
-
