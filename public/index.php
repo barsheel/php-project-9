@@ -16,8 +16,6 @@ const DATABASE_PORT = 5432;
 
 session_start();
 
-
-
 $container = new Container();
 
 $container->set(Twig::class, function () {
@@ -53,7 +51,6 @@ $app->add(TwigMiddleware::create($app, $container->get(Twig::class)));
 $app->addErrorMiddleware(true, true, true);
 
 
-
 $app->get('/', function ($request, $response) {
     $twig = $this->get(Twig::class);
     return $twig->render($response, 'index_template.twig');
@@ -68,7 +65,7 @@ $app->get('/urls', function ($request, $response) {
     $urlsDTO = [];
     foreach ($urls as $url) {
         $id = $url->getId();
-        $checks = $checkRepository->findChecksByUrlId($id);
+        $checks = $checkRepository->findByUrlId($id);
         $lastCheck = $checks->first();
         $lastCheckDate = $lastCheck ? $lastCheck->getCreatedAt() : '-';
         $lastStatusCode = $lastCheck ? $lastCheck->getStatusCode() : '-';
@@ -103,7 +100,7 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
         'createdAt' => $url->getCreatedAt()
     ];
 
-    $checks = $checkRepository->findChecksByUrlId($id);
+    $checks = $checkRepository->findByUrlId($id);
     $checksDTO = [];
     foreach ($checks as $check) {
         $checksDTO[] = [

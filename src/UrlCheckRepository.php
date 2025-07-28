@@ -43,7 +43,7 @@ class UrlCheckRepository
         return $stmt->fetchColumn();
     }
 
-    public function findChecksByUrlId(int $urlId): Collection
+    public function findByUrlId(int $urlId): Collection
     {
         $sqlChecks =
             "SELECT
