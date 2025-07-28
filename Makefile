@@ -2,7 +2,6 @@ PORT ?= 8000
 
 start:
 	php -S 0.0.0.0:$(PORT) -t public public/index.php
-
 init:
 	composer init
 
@@ -24,7 +23,7 @@ lint:
 	composer exec --verbose phpcs -- --standard=PSR12 ./public ./src
 
 stan:
-	composer exec phpstan -- analyze -c phpstan.neon
+	composer exec phpstan -- analyze --memory-limit=-1 -c phpstan.neon
 
 test:
 	composer exec --verbose phpunit tests -- --display-warnings
