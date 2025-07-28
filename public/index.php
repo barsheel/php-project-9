@@ -168,9 +168,21 @@ $app->post('/urls', function ($request, $response) {
 
 
 $app->post('/urls/{id}/checks', function ($request, $response, $args) {
-    $twig = $this->get(Twig::class);
-    $params = ['test' => 'test'];
+    $flash = $this->get('flash');
+    $id = $args['id'];
+    $urlCheckRepository = $this->get(UrlCheckRepository::class);
 
+    $statusCode = 0;
+    $h1 = "test_h1";
+    $title = "test_title";
+    $description = "test_description";
+
+    if ($urlCheckRepository->save($id, $statusCode, $h1, $title, $description)) {
+        $flash->addMessage('success', "Страница успешно проверена");
+        return $response->withRedirect("/urls/{$id}");
+    }
+    $params = [];
+    $twig = $this->get(Twig::class);
     return $twig->render($response, 'urls_template.twig', $params);
 })->setName('url_check');
 
