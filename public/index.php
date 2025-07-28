@@ -173,14 +173,20 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
         $url = $urlRepository->findById($id)->getName();
         $client = new GuzzleHttp\Client();
         $res = $client->request('GET', $url);
-
         $statusCode = $res->getStatusCode();
 
-        $h1 = "test_h1";
-        $title = "test_title";
-        $description = "test_description";
+        $document = new DiDom\Document($url, true);
 
-        if ($urlCheckRepository->save($id, $statusCode, $h1, $title, $description)) {
+        $h1 = $document->first('h1');
+        $h1Text = $h1 ? $h1->text() : "-";
+
+        $title = $document->first('title');
+        $titleText = $title ? $title->text() : "-";
+
+        $meta = $document->first('meta[name=description]');
+        $description = $meta ? $meta->getAttribute('content') : '-';
+
+        if ($urlCheckRepository->save($id, $statusCode, $h1Text, $titleText, $description)) {
             $flash->addMessage('success', "Страница успешно проверена");
             return $response->withRedirect("/urls/{$id}");
         }
