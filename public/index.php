@@ -166,20 +166,28 @@ $app->post('/urls', function ($request, $response) {
 $app->post('/urls/{id}/checks', function ($request, $response, $args) {
     $flash = $this->get('flash');
     $id = $args['id'];
+    $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
 
-    $statusCode = 0;
-    $h1 = "test_h1";
-    $title = "test_title";
-    $description = "test_description";
+    try {
+        $url = $urlRepository->findById($id)->getName();
+        $client = new GuzzleHttp\Client();
+        $res = $client->request('GET', $url);
 
-    if ($urlCheckRepository->save($id, $statusCode, $h1, $title, $description)) {
-        $flash->addMessage('success', "Страница успешно проверена");
+        $statusCode = $res->getStatusCode();
+
+        $h1 = "test_h1";
+        $title = "test_title";
+        $description = "test_description";
+
+        if ($urlCheckRepository->save($id, $statusCode, $h1, $title, $description)) {
+            $flash->addMessage('success', "Страница успешно проверена");
+            return $response->withRedirect("/urls/{$id}");
+        }
+    } catch (Exception $exception) {
+        $flash->addMessage('errors', "Произошла ошибка при проверке, не удалось подключиться");
         return $response->withRedirect("/urls/{$id}");
     }
-    $params = [];
-    $twig = $this->get(Twig::class);
-    return $twig->render($response, 'urls_template.twig', $params);
 })->setName('url_check');
 
 
