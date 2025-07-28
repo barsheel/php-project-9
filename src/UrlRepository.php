@@ -2,6 +2,7 @@
 
 namespace Hexlet\Code;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class UrlRepository
@@ -12,7 +13,7 @@ class UrlRepository
     {
         $this->conn = $conn;
     }
-    public function save(String $name): bool
+    public function save(string $name): int
     {
         $sql = "INSERT INTO urls (
                         name,
@@ -20,12 +21,13 @@ class UrlRepository
                     )
                     VALUES (
                         :name,
-                        NOW()
-                    );";
+                        :created_at
+                    ) RETURNING id;";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue('name', strtolower($name));
-
-        return $stmt->execute();
+        $stmt->bindValue('name', $name);
+        $stmt->bindValue('created_at', Carbon::now()->toDateTimeString());
+        $stmt->execute();
+        return $stmt->fetchColumn();
     }
 
     public function delete(int $id): bool
@@ -83,7 +85,7 @@ class UrlRepository
 
         return new Url($id, $name, $createdAt);
     }
-    
+
     public function readAll(): Collection
     {
         $sql = "SELECT
