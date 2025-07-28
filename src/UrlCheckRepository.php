@@ -3,6 +3,7 @@
 namespace Hexlet\Code;
 
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 class UrlCheckRepository
 {
@@ -11,6 +12,35 @@ class UrlCheckRepository
     public function __construct(\PDO $conn)
     {
         $this->conn = $conn;
+    }
+
+    public function save(int $url_id, int $statusCode, string $h1, string $title, string $description): int
+    {
+        $sql = "INSERT INTO url_checks (
+                    url_id,
+                    status_code,
+                    h1,
+                    title,
+                    description,
+                    created_at
+                )
+                VALUES (
+                    :url_id,
+                    :status_code,
+                    :h1,
+                    :title,
+                    :description,
+                    :created_at
+                ) RETURNING id;";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue('url_id', $url_id);
+        $stmt->bindValue('status_code', $statusCode);
+        $stmt->bindValue('h1', $h1);
+        $stmt->bindValue('title', $title);
+        $stmt->bindValue('description', $description);
+        $stmt->bindValue('created_at', Carbon::now()->toDateTimeString());
+        $stmt->execute();
+        return $stmt->fetchColumn();
     }
 
     public function findChecksByUrlId(int $urlId): Collection
