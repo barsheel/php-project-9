@@ -1,19 +1,17 @@
-    {% extends "base_template.twig" %}
+{% extends "base_template.twig" %}
 
 {% block content %}
-<div class="card mx-auto my-4" style="box-shadow: 0px 0px 18px rgb(202,228,255); max-width: 600px;">
+<div class="card mx-auto my-4" style="box-shadow: 0px 0px 18px rgb(202,228,255); max-width: 800px;">
   <div class="card-body">
-    <h2 class="card-title">Анализатор страниц</h2>
-    <h6 class="text-muted card-subtitle mb-4">
-      Бесплатно проверяйте сайты на SEO пригодность
-    </h6>
+    <h1 class="display-3">Анализатор страниц</h1>
+    <p class="lead">Бесплатно проверяйте сайты на SEO пригодность</p>
 
-    <form class="row g-2 align-items-start" action="/urls" method="post" enctype="application/x-www-form-urlencoded">
-      <div class="col-12 col-sm flex-grow-1">
+    <form class="row" action="/urls" method="post">
+      <div class="col-8">
         <input
           type="text"
           name="url[name]"
-          class="form-control {{ errors.url_name is defined ? 'is-invalid' }}"
+          class="form-control form-control-lg {{ errors.url_name is defined ? 'is-invalid' }}"
           placeholder="https://www.example.com"
           value="{{ url_name|default('')|e }}"
         >
@@ -24,8 +22,8 @@
         {% endif %}
       </div>
 
-      <div class="col-12 col-sm-auto">
-        <button type="submit" class="btn btn-primary w-100">
+      <div class="col-2">
+        <button type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase mx-3">
           Проверить
         </button>
       </div>

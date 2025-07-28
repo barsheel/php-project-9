@@ -1,58 +1,58 @@
 {% extends "base_template.twig" %}
 
 {% block content %}
-    <div class="container" style="margin-top: 20px;">
-        <div style="display: block;position: relative;">
-            <h1>Сайт: {{url.name}}</h1>
-            <div class="table-responsive" style="max-width: none;" data-test="url">
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold" style="width: 180px;">ID</td>
-                            <td>{{url.id}}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold">Имя</td>
-                            <td>{{url.name}}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold">Дата создания</td>
-                            <td>{{url.createdAt}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+
+<main class="flex-grow-1">
+    <div class="container-lg mt-3">
+    <h1>Сайт: {{url.name}}</h1>
+    <div class="table-responsive" style="max-width: none;" data-test="url">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td class="fw-bold" style="width: 180px;">ID</td>
+                    <td>{{url.id}}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Имя</td>
+                    <td>{{url.name}}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Дата создания</td>
+                    <td>{{url.createdAt}}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <div class="container">
-        <div>
-            <h3>Проверки</h3>
-            <form><button class="btn btn-primary" type="submit" style="margin-bottom: 12px;">Запустить проверку</button></form>
-            <div class="table-responsive" style="max-width: none;">
-                <table class="table table-bordered" data-test="checks">
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold" style="width: 180px;max-width: 30px;">ID</td>
-                            <td class="fw-bold" style="width: 180px;">Код ответа</td>
-                            <td class="fw-bold" style="width: 180px;">h1</td>
-                            <td class="fw-bold" style="width: 180px;">title</td>
-                            <td class="fw-bold" style="width: 180px;">description</td>
-                            <td class="fw-bold" style="width: 180px;">Дата создания</td>
-                        </tr>
-                        {% for check in checks %}
-                            <tr>
-                                <td class="fw-regular" style="width: 180px;max-width: 30px;">{{check.id}}</td>
-                                <td class="fw-regular" style="width: 180px;">{{check.statusCode}}</td>
-                                <td class="fw-regular" style="width: 180px;">{{check.h1}}</td>
-                                <td class="fw-regular" style="width: 180px;">{{check.title}}</td>
-                                <td class="fw-regular" style="width: 180px;">{{check.description}}</td>
-                                <td class="fw-regular" style="width: 180px;">{{check.createdAt}}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <hr>
+
+    <h2 class="mt-5 mb-3">Проверки</h2>
+    <form method="post" action="/urls/{{url.id}}/checks">
+        <input type="submit" class="btn btn-primary" value="Запустить проверку">
+    </form>
+        <table class="table table-bordered table-hover" data-test="checks">
+            <tbody>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Код ответа</th>
+                        <th>h1</th>
+                        <th>title</th>
+                        <th>description</th>
+                        <th>Дата создания</th>
+                    </tr>
+                </thead>
+                {% for check in checks %}
+                    <tr>
+                        <td class="fw-regular" style="width: 180px;max-width: 30px;">{{check.id}}</td>
+                        <td class="fw-regular" style="width: 180px;">{{check.statusCode}}</td>
+                        <td class="fw-regular" style="width: 180px;">{{check.h1}}</td>
+                        <td class="fw-regular" style="width: 180px;">{{check.title}}</td>
+                        <td class="fw-regular" style="width: 180px;">{{check.description}}</td>
+                        <td class="fw-regular" style="width: 180px;">{{check.createdAt}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <div>
+</main>
+
 {% endblock %}
