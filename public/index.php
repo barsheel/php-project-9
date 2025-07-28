@@ -138,32 +138,34 @@ $app->post('/urls', function ($request, $response) {
     $urlRepository = $this->get(UrlRepository::class);
     $flash = $this->get('flash');
 
-    $validator = new Valitron\Validator(['urlname' => $urlName]);
-    $validator->rule('url', 'urlname');
-    $validator->rule('required', 'urlname');
+    $validator = new Valitron\Validator(['urlName' => $urlName]);
+    $validator->rule('url', 'urlName');
+    $validator->rule('required', 'urlName');
     $validator->rule('lengthMax', '255');
     if ($validator->validate() === false) {
         $errors = ['url_name' => "Некорректный URL"];
         $params = ['errors' => $errors];
         return $twig->render($response, 'index_template.twig', $params);
     }
-    
-    $existedUrl = $urlRepository->findByName($urlName);
+
+    $parsedUrl = parse_url($urlName);
+    $baseUrl = $parsedUrl['scheme'] . "://" . $parsedUrl['host'];
+
+    $existedUrl = $urlRepository->findByName($baseUrl);
     if ($existedUrl !== null) {
         $existedId = $existedUrl->getId();
-        $flash->addMessage('warning', "Уже есть в базе");
+        $flash->addMessage('success', "Страница уже существует");
         return $response->withRedirect("/urls/{$existedId}");
     }
 
-    $newId = $urlRepository->save($urlName);
+    $newId = $urlRepository->save($baseUrl);
     if ($newId === false) {
         $flash->addMessage('error', "Что то пошло не так");
         return $response->withRedirect('/');
     }
-    
-    $flash->addMessage('success', "Успешно добавлено");
-    return $response->withRedirect('/urls');
 
+    $flash->addMessage('success', "Страница успешно добавлена");
+    return $response->withRedirect("/urls/{$newId}");
 })->setName('add_url');
 
 
