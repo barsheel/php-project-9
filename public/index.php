@@ -10,6 +10,8 @@ use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Hexlet\Code\UrlRepository;
 use Hexlet\Code\UrlCheckRepository;
+use GuzzleHttp\Client;
+use DiDom\Document;
 
 const DATABASE_ENV_NAME = 'DATABASE_URL';
 const DATABASE_PORT = 5432;
@@ -20,9 +22,7 @@ $container = new Container();
 
 $container->set(Twig::class, function () {
     return Twig::create(__DIR__ . '/../templates', [
-        'cache' => false, // Полностью отключаем кеш
-        'auto_reload' => true, // Автоматически проверяем изменения
-        'debug' => true // либо Включаем режим отладки
+        'auto_reload' => true
     ]);
 });
 
@@ -35,7 +35,7 @@ $container->set(\PDO::class, function () {
     $user = $databaseUrl['user'];
     $pass = $databaseUrl['pass'];
     $host = $databaseUrl['host'];
-    $port = DATABASE_PORT;
+    $port = $databaseUrl['port'] ?? 5432;
     $dbname = ltrim($databaseUrl['path'], '/');
 
     $conn = new \PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $pass);
@@ -52,8 +52,7 @@ $app->addErrorMiddleware(true, true, true);
 
 
 $app->get('/', function ($request, $response) {
-    $twig = $this->get(Twig::class);
-    return $twig->render($response, 'index_template.twig');
+    return $this->get(Twig::class)->render($response, 'index_template.twig');
 })->setName('index');
 
 
@@ -83,8 +82,7 @@ $app->get('/urls', function ($request, $response) {
         'alerts' => $this->get("flash")->getMessages()
     ];
 
-    $twig = $this->get(Twig::class);
-    return $twig->render($response, 'urls_template.twig', $params);
+    return $this->get(Twig::class)->render($response, 'urls_template.twig', $params);
 })->setName('urls');
 
 
@@ -119,27 +117,24 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
         'alerts' => $this->get("flash")->getMessages()
     ];
 
-    $twig = $this->get(Twig::class);
-    return $twig->render($response, 'url_template.twig', $params);
+    return $this->get(Twig::class)->render($response, 'url_template.twig', $params);
 })->setName('url');
 
 
-$app->post('/urls', function ($request, $response) {
-    $twig = $this->get(Twig::class);
+$app->post('/urls', function ($request, $response) use ($router) {
     $body = $request->getParsedBody();
     $urlName = $body['url']['name'];
 
     $urlRepository = $this->get(UrlRepository::class);
-    $flash = $this->get('flash');
 
     $validator = new Valitron\Validator(['urlName' => $urlName]);
     $validator->rule('url', 'urlName');
     $validator->rule('required', 'urlName');
-    $validator->rule('lengthMax', '255');
+    $validator->rule('lengthMax', 'urlName', 255);
     if ($validator->validate() === false) {
         $errors = ['url_name' => "Некорректный URL"];
         $params = ['errors' => $errors];
-        return $twig->render($response, 'index_template.twig', $params);
+        return $this->get(Twig::class)->render($response, 'index_template.twig', $params);
     }
 
     $parsedUrl = parse_url($urlName);
@@ -148,23 +143,22 @@ $app->post('/urls', function ($request, $response) {
     $existedUrl = $urlRepository->findByName($baseUrl);
     if ($existedUrl !== null) {
         $existedId = $existedUrl->getId();
-        $flash->addMessage('success', "Страница уже существует");
-        return $response->withRedirect("/urls/{$existedId}");
+        $this->get('flash')->addMessage('success', "Страница уже существует");
+        return $response->withRedirect($router->urlFor ("url", ["id" => $existedId]));
     }
 
     $newId = $urlRepository->save($baseUrl);
     if ($newId === false) {
-        $flash->addMessage('error', "Что то пошло не так");
-        return $response->withRedirect('/');
+        $this->get('flash')->addMessage('error', "Что то пошло не так");
+        return $response->withRedirect($router->urlFor ("index"));
     }
 
-    $flash->addMessage('success', "Страница успешно добавлена");
-    return $response->withRedirect("/urls/{$newId}");
+    $this->get('flash')->addMessage('success', "Страница успешно добавлена");
+    return $response->withRedirect($router->urlFor ("url", ["id" => $newId]));
 })->setName('add_url');
 
 
-$app->post('/urls/{id}/checks', function ($request, $response, $args) {
-    $flash = $this->get('flash');
+$app->post('/urls/{id}/checks', function ($request, $response, $args) use ($router) {
     $id = $args['id'];
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
@@ -183,26 +177,24 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
         $meta = $document->first('meta[name=description]');
         $description = $meta ? $meta->getAttribute('content') : '-';
 
-        error_log( " ------------------> response ". $statusCode . " " . $h1Text  . " " .  $titleText  . " " .  $description);
-
         if ($urlCheckRepository->save($id, $statusCode, $h1Text, $titleText, $description)) {
 
-            $statusClass = $statusCode / 100;
+            $statusClass = (int)($statusCode / 100);
             if ($statusClass === 1) {
-                $flash->addMessage('success', "Проверка была выполнена успешно, получено информационное сообщение");
+                $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, получено информационное сообщение");
             } elseif ($statusClass === 2) {
-                $flash->addMessage('success', "Страница успешно проверена");
+                $this->get('flash')->addMessage('success', "Страница успешно проверена");
             } elseif ($statusClass === 3) {
-                $flash->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с перенаправлением");
+                $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с перенаправлением");
             } elseif ($statusClass === 4 || $statusClass === 5) {
-                $flash->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
+                $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
             }
-            return $response->withRedirect("/urls/{$id}");
         }
     } catch (\Throwable $exception) {
-        $flash->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
-        return $response->withRedirect("/urls/{$id}");
+        $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
     }
+    
+    return $response->withRedirect($router->urlFor ("url", ["id" => $id]));
 })->setName('url_check');
 
 
