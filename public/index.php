@@ -45,7 +45,7 @@ $container->set(\PDO::class, function () {
 
 $app = AppFactory::createFromContainer($container);
 
-
+$router = $app->getRouteCollector()->getRouteParser();
 
 $app->add(TwigMiddleware::create($app, $container->get(Twig::class)));
 $app->addErrorMiddleware(true, true, true);
@@ -176,13 +176,10 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
         $statusCode = $res->getStatusCode();
 
         $document = new DiDom\Document($url, true);
-
         $h1 = $document->first('h1');
         $h1Text = $h1 ? $h1->text() : "-";
-
         $title = $document->first('title');
         $titleText = $title ? $title->text() : "-";
-
         $meta = $document->first('meta[name=description]');
         $description = $meta ? $meta->getAttribute('content') : '-';
 
@@ -202,8 +199,8 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
             }
             return $response->withRedirect("/urls/{$id}");
         }
-    } catch (Exception $exception) {
-        $flash->addMessage('errors', "Произошла ошибка при проверке, не удалось подключиться");
+    } catch (\Throwable $exception) {
+        $flash->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
         return $response->withRedirect("/urls/{$id}");
     }
 })->setName('url_check');
