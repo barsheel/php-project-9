@@ -186,8 +186,20 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
         $meta = $document->first('meta[name=description]');
         $description = $meta ? $meta->getAttribute('content') : '-';
 
+        error_log( " ------------------> response ". $statusCode . " " . $h1Text  . " " .  $titleText  . " " .  $description);
+
         if ($urlCheckRepository->save($id, $statusCode, $h1Text, $titleText, $description)) {
-            $flash->addMessage('success', "Страница успешно проверена");
+
+            $statusClass = $statusCode / 100;
+            if ($statusClass === 1) {
+                $flash->addMessage('success', "Проверка была выполнена успешно, получено информационное сообщение");
+            } elseif ($statusClass === 2) {
+                $flash->addMessage('success', "Страница успешно проверена");
+            } elseif ($statusClass === 3) {
+                $flash->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с перенаправлением");
+            } elseif ($statusClass === 4 || $statusClass === 5) {
+                $flash->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
+            }
             return $response->withRedirect("/urls/{$id}");
         }
     } catch (Exception $exception) {
