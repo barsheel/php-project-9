@@ -3,17 +3,18 @@
 {% block content %}
     <div class="container">
         <div>
-            <h3>Сайты</h3>
-            <div class="table-responsive" style="max-width: none;">
+            <h3>Сайты</h3>			
+			<div class="table-responsive" style="max-width: none;">
                 <table class="table table-bordered" data-test="urls">
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold" style="width: 180px;max-width: 30px;">ID</td>
-                            <td class="fw-bold" style="width: 180px;">Имя</td>
-                            <td class="fw-bold" style="width: 180px;">Последняя проверка</td>
-                            <td class="fw-bold" style="width: 180px;">Код ответа</td>
-                        </tr>
-
+                    <thead>
+							<tr>
+								<th class="fw-bold" style="width: 180px;max-width: 30px;">ID</th>
+								<th class="fw-bold" style="width: 180px;">Имя</th>
+								<th class="fw-bold" style="width: 180px;">Последняя проверка</th>
+								<th class="fw-bold" style="width: 180px;">Код ответа</th>
+							</tr>
+					</thead>
+					<tbody>
                         {% for url in urls %}
                             <tr>
                                 <td>{{url.id}}</td>
@@ -22,7 +23,6 @@
                                 <td>{{url.lastStatusCode}}</td>
                             </tr>
                         {% endfor %}
-
                     </tbody>
                 </table>
             </div>
