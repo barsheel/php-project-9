@@ -134,7 +134,7 @@ $app->post('/urls', function ($request, $response) use ($router) {
     if ($validator->validate() === false) {
         $errors = ['url_name' => "Некорректный URL"];
         $params = ['errors' => $errors];
-        return $this->get(Twig::class)->render($response, 'index_template.twig', $params);
+        return $this->get(Twig::class)->render($response->withStatus(422), 'index_template.twig', $params);
     }
 
     $parsedUrl = parse_url($urlName);
