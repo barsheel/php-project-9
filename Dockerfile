@@ -44,7 +44,7 @@ WORKDIR /hexlet-code
 COPY . .
 
 #только для деплоя
-RUN composer install || true
+RUN composer install
 
 #запуск
 
