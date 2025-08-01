@@ -31,7 +31,11 @@ $container->set('flash', function () {
 });
 
 $container->set(\PDO::class, function () {
-    $databaseUrl = parse_url(getenv(DATABASE_ENV_NAME));
+    $dbEnv = getenv(DATABASE_ENV_NAME);
+    if ($dbEnv === false) {
+        throw new Exception('Environment variable not found');
+    }
+    $databaseUrl = parse_url((string) $dbEnv);
     $user = $databaseUrl['user'];
     $pass = $databaseUrl['pass'];
     $host = $databaseUrl['host'];
@@ -163,7 +167,7 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
 
-    try {
+   // try {
         $url = $urlRepository->findById($id)->getName();
         $client = new GuzzleHttp\Client();
         $res = $client->request('GET', $url);
@@ -171,9 +175,10 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
 
         $document = new DiDom\Document($url, true);
         $h1 = $document->first('h1');
-        $h1Text = $h1 ? $h1->text() : "-";
+        $h1Text = $h1 ? optional($h1)->text() : "-";
+
         $title = $document->first('title');
-        $titleText = $title ? $title->text() : "-";
+        $titleText = $title ?  optional($title)->text() : "-";
         $meta = $document->first('meta[name=description]');
         $description = $meta ? $meta->getAttribute('content') : '-';
 
@@ -190,9 +195,9 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
                 $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
             }
         }
-    } catch (\Throwable $exception) {
+ /*   } catch (\Throwable $exception) {
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
-    }
+    }*/
     
     return $response->withRedirect($router->urlFor ("url", ["id" => $id]));
 })->setName('url_check');
