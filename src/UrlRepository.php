@@ -63,7 +63,7 @@ class UrlRepository
         return new Url($id, $name, $createdAt);
     }
 
-    public function findByName($name): ?Url
+    public function findByName(string $name): ?Url
     {
         $sql = "SELECT                     
                     id,
@@ -86,6 +86,9 @@ class UrlRepository
         return new Url($id, $name, $createdAt);
     }
 
+    /**
+     * @return Collection<int, UrlCheck>
+     */
     public function readAll(): Collection
     {
         $sql = "SELECT

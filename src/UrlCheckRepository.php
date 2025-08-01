@@ -43,6 +43,9 @@ class UrlCheckRepository
         return $stmt->fetchColumn();
     }
 
+    /**
+     * @return Collection<int, UrlCheck>
+     */
     public function findByUrlId(int $urlId): Collection
     {
         $sqlChecks =
