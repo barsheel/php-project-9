@@ -17,7 +17,7 @@
         >
         {% if errors.url_name is defined %}
           <div class="invalid-feedback d-block">
-            {{ errors.url_name }}
+            {{ errors.url_name[0] }}
           </div>
         {% endif %}
       </div>

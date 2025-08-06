@@ -131,13 +131,15 @@ $app->post('/urls', function ($request, $response) use ($router) {
 
     $urlRepository = $this->get(UrlRepository::class);
 
-    $validator = new Valitron\Validator(['urlName' => $urlName]);
-    $validator->rule('url', 'urlName');
-    $validator->rule('required', 'urlName');
-    $validator->rule('lengthMax', 'urlName', 255);
+    $validator = new Valitron\Validator(['url_name' => $urlName]);
+    $validator->rule('required', 'url_name')->message('URL не может быть пустым');
+    $validator->rule('url', 'url_name')->message('Некорректный URL');
+    $validator->rule('lengthMax', 'url_name', 255)->message('URL должен быть короче 255 символов');
     if ($validator->validate() === false) {
-        $errors = ['url_name' => "Некорректный URL"];
-        $params = ['errors' => $errors];
+        $params = [
+            'url_name' => $urlName,
+            'errors' => $validator->errors()
+        ];
         return $this->get(Twig::class)->render($response->withStatus(422), 'index_template.twig', $params);
     }
 
