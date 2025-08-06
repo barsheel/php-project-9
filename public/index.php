@@ -167,13 +167,13 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
 
-   // try {
+    try {
         $url = $urlRepository->findById($id)->getName();
         $client = new GuzzleHttp\Client();
         $res = $client->request('GET', $url);
         $statusCode = $res->getStatusCode();
 
-        $document = new DiDom\Document($url, true);
+        $document = new DiDom\Document($res->getBody()->getContents());
         $h1 = $document->first('h1');
         $h1Text = $h1 ? optional($h1)->text() : "-";
 
@@ -195,10 +195,10 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
                 $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
             }
         }
- /*   } catch (\Throwable $exception) {
+    } catch (\Throwable $exception) {
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
-    }*/
-    
+    }
+
     return $response->withRedirect($router->urlFor ("url", ["id" => $id]));
 })->setName('url_check');
 
