@@ -170,19 +170,33 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
 
     try {
         $url = $urlRepository->findById($id)->getName();
+        $client = new GuzzleHttp\Client([
+            'verify' => false,
+            'allow_redirects' => false,
+            'http_errors' => false
+        ]);
         $res = $client->request('GET', $url);
         $statusCode = $res->getStatusCode();
+        
+        $body = $res->getBody();
+        $body->rewind();
+        $content = (string)$body->getContents();
 
-        $document = new DiDom\Document($res->getBody()->getContents());
-        $h1 = $document->first('h1');
-        $h1Text = $h1 ? optional($h1)->text() : "-";
-
-        $title = $document->first('title');
-        $titleText = $title ?  optional($title)->text() : "-";
-        $meta = $document->first('meta[name=description]');
-        $description = $meta ? $meta->getAttribute('content') : '-';
-
-        if ($urlCheckRepository->save($id, $statusCode, $h1Text, $titleText, $description)) {
+        if (empty($content)) {
+            $h1Text = '-';
+            $titleText = '-';
+            $descriptionText = '-';
+        } else {
+            $document = new DiDom\Document($content);
+            $h1 = $document->first('h1');
+            $h1Text = $h1 ? optional($h1)->text() : "-";
+            $title = $document->first('title');
+            $titleText = $title ?  optional($title)->text() : "-";
+            $description = $document->first('meta[name=description]');
+            $descriptionText = $description ? $description->getAttribute('content') : '-';
+        }
+        
+        if ($urlCheckRepository->save($id, $statusCode, $h1Text, $titleText, $descriptionText)) {
 
             $statusClass = (int)($statusCode / 100);
             if ($statusClass === 1) {
@@ -190,11 +204,14 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
             } elseif ($statusClass === 2) {
                 $this->get('flash')->addMessage('success', "Страница успешно проверена");
             } elseif ($statusClass === 3) {
+                $this->get('flash')->addMessage('warning', "Проверка была выполнена успешно, но сервер ответил с перенаправлением");
             } elseif ($statusClass === 4 || $statusClass === 5) {
+                $this->get('flash')->addMessage('warning', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
             }
         }
     } catch (\Throwable $exception) {
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
+
     }
 
     return $response->withRedirect($router->urlFor ("url", ["id" => $id]));

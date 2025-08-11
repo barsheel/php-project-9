@@ -26,6 +26,10 @@
         <div class="alert alert-danger" role="alert" ><span><strong>{{elem}}</strong></span></div>
     {% endfor %}    
 
+    {% for elem in alerts.warning %}
+        <div class="alert alert-warning" role="alert" ><span><strong>{{elem}}</strong></span></div>
+    {% endfor %}   
+
     {% for elem in alerts.success %}
         <div class="alert alert-success" role="alert" ><span><strong>{{elem}}</strong></span></div>
     {% endfor %}
