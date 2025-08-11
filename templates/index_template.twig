@@ -11,13 +11,13 @@
         <input
           type="text"
           name="url[name]"
-          class="form-control form-control-lg {{ errors.url_name is defined ? 'is-invalid' }}"
+          class="form-control form-control-lg {{ errors.urlName is defined ? 'is-invalid' }}"
           placeholder="https://www.example.com"
-          value="{{ url_name|default('')|e }}"
+          value="{{ urlName|default('')|e }}"
         >
-        {% if errors.url_name is defined %}
+        {% if errors.urlName is defined %}
           <div class="invalid-feedback d-block">
-            {{ errors.url_name[0] }}
+            {{ errors.urlName[0] }}
           </div>
         {% endif %}
       </div>
