@@ -14,7 +14,6 @@ use GuzzleHttp\Client;
 use DiDom\Document;
 
 const DATABASE_ENV_NAME = 'DATABASE_URL';
-const DATABASE_PORT = 5432;
 
 session_start();
 
@@ -39,7 +38,7 @@ $container->set(\PDO::class, function () {
     $user = $databaseUrl['user'];
     $pass = $databaseUrl['pass'];
     $host = $databaseUrl['host'];
-    $port = $databaseUrl['port'] ?? 5432;
+    $port = $databaseUrl['port'];
     $dbname = ltrim($databaseUrl['path'], '/');
 
     $conn = new \PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $pass);
@@ -131,13 +130,13 @@ $app->post('/urls', function ($request, $response) use ($router) {
 
     $urlRepository = $this->get(UrlRepository::class);
 
-    $validator = new Valitron\Validator(['url_name' => $urlName]);
-    $validator->rule('required', 'url_name')->message('URL не может быть пустым');
-    $validator->rule('url', 'url_name')->message('Некорректный URL');
-    $validator->rule('lengthMax', 'url_name', 255)->message('URL должен быть короче 255 символов');
-    if ($validator->validate() === false) {
+    $validator = new Valitron\Validator(['urlName' => $urlName]);
+    $validator->rule('required', 'urlName')->message('URL не может быть пустым');
+    $validator->rule('url', 'urlName')->message('Некорректный URL');
+    $validator->rule('lengthMax', 'urlName', 255)->message('URL должен быть короче 255 символов');
+    if (!$validator->validate()) {
         $params = [
-            'url_name' => $urlName,
+            'urlName' => $urlName,
             'errors' => $validator->errors()
         ];
         return $this->get(Twig::class)->render($response->withStatus(422), 'index_template.twig', $params);
@@ -171,7 +170,6 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
 
     try {
         $url = $urlRepository->findById($id)->getName();
-        $client = new GuzzleHttp\Client();
         $res = $client->request('GET', $url);
         $statusCode = $res->getStatusCode();
 
@@ -192,9 +190,7 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
             } elseif ($statusClass === 2) {
                 $this->get('flash')->addMessage('success', "Страница успешно проверена");
             } elseif ($statusClass === 3) {
-                $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с перенаправлением");
             } elseif ($statusClass === 4 || $statusClass === 5) {
-                $this->get('flash')->addMessage('success', "Проверка была выполнена успешно, но сервер ответил с ошибкой");
             }
         }
     } catch (\Throwable $exception) {
